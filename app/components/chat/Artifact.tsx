@@ -33,9 +33,15 @@ export const Artifact = memo(({ messageId }: ArtifactProps) => {
   const artifacts = useStore(workbenchStore.artifacts);
   const artifact = artifacts[messageId];
 
-  const actions = useStore(
-    computed(artifact.runner.actions, (actions) => {
-      return Object.values(actions);
+  const actions: ActionState[] = useStore(
+    computed(workbenchStore.artifacts, (artifacts) => {
+      const currentArtifact = artifacts[messageId];
+
+      if (currentArtifact && currentArtifact.runner && currentArtifact.runner.actions) {
+        return Object.values(currentArtifact.runner.actions);
+      } else {
+        return [];
+      }
     }),
   );
 
@@ -49,7 +55,7 @@ export const Artifact = memo(({ messageId }: ArtifactProps) => {
       setShowActions(true);
     }
 
-    if (actions.length !== 0 && artifact.type === 'bundled') {
+    if (actions.length > 0 && artifact.type === 'bundled') {
       const finished = !actions.find((action) => action.status !== 'complete');
 
       if (allActionFinished !== finished) {
